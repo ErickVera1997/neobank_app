@@ -67,15 +67,15 @@ DateTime? jsonDateOrNull(Map<String, dynamic> json, String key) {
 Map<String, dynamic> jsonMap(Map<String, dynamic> json, String key) {
   final value = json[key];
   if (value is Map<String, dynamic>) return value;
-  if (value is Map) return value.cast<String, dynamic>();
+  if (value is Map<dynamic, dynamic>) return value.cast<String, dynamic>();
   return <String, dynamic>{};
 }
 
 List<Map<String, dynamic>> jsonList(Map<String, dynamic> json, String key) {
   final value = json[key];
-  if (value is List) {
+  if (value is List<dynamic>) {
     return value
-        .whereType<Map>()
+        .whereType<Map<dynamic, dynamic>>()
         .map((e) => e.cast<String, dynamic>())
         .toList(growable: false);
   }
