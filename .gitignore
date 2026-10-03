@@ -1,0 +1,34 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/mcp.json
+*.iml
+
+# OS
+.DS_Store
+
+# Env / secrets
+.env
+*.local.json
+google-services.json
+GoogleService-Info.plist
+
+# Local data
+*.sqlite
+*.sqlite3
+*.db
+server/data/
+
+# Coverage / test
+coverage/
+test/failures/
+
+# Logs
+*.log
