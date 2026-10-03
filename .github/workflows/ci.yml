@@ -59,3 +59,19 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+
+  smoke:
+    name: API smoke (live server + FX)
+    runs-on: ubuntu-latest
+    needs: api
+    defaults:
+      run:
+        working-directory: services/neobank_api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      # El chequeo de FX es tolerante a entornos sin salida a Internet.
+      - run: dart run tool/smoke.dart
