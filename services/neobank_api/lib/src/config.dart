@@ -11,7 +11,7 @@ class AppConfig {
     required this.otpTtl,
     required this.fxBaseUrl,
     required this.environment,
-    this.fcmServerKey,
+    this.pushWebhookUrl,
     this.fxTimeout = const Duration(seconds: 8),
   });
 
@@ -26,7 +26,7 @@ class AppConfig {
   final String fxBaseUrl;
   final Duration fxTimeout;
   final String environment;
-  final String? fcmServerKey;
+  final String? pushWebhookUrl;
 
   bool get isDevelopment => environment == 'development';
 
@@ -41,7 +41,7 @@ class AppConfig {
       otpTtl: const Duration(minutes: 5),
       fxBaseUrl: env['FX_BASE_URL'] ?? 'https://api.frankfurter.app',
       environment: env['ENV'] ?? 'development',
-      fcmServerKey: env['FCM_SERVER_KEY'],
+      pushWebhookUrl: env['PUSH_WEBHOOK_URL'],
     );
   }
 }

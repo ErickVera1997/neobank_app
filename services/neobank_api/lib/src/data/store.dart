@@ -262,6 +262,18 @@ class Store {
     return rows.isEmpty ? null : _accountFromRow(rows.first);
   }
 
+  /// Ajuste directo de saldo (usado por datos semilla / procesos batch).
+  void setAccountBalance(
+    String accountId, {
+    required int balanceMinor,
+    required int availableMinor,
+  }) {
+    _db.execute(
+      'UPDATE accounts SET balance_minor = ?, available_minor = ? WHERE id = ?',
+      [balanceMinor, availableMinor, accountId],
+    );
+  }
+
   BankAccount _accountFromRow(Row row) => BankAccount(
         id: row['id'] as String,
         userId: row['user_id'] as String,
@@ -325,6 +337,7 @@ class Store {
     String? merchant,
     TransactionStatus status = TransactionStatus.posted,
     String? transactionId,
+    DateTime? createdAt,
   }) {
     final account = accountById(accountId);
     if (account == null) {
@@ -334,6 +347,7 @@ class Store {
     final newBalance = account.balance.minorUnits + signed;
     final newAvailable = account.available.minorUnits + signed;
     final id = transactionId ?? const Uuid().v4();
+    final effectiveCreatedAt = createdAt ?? DateTime.now();
     final tx = BankTransaction(
       id: id,
       accountId: accountId,
@@ -343,7 +357,7 @@ class Store {
       amount: Money(signed, currency),
       balanceAfter: Money(newBalance, currency),
       status: status,
-      createdAt: DateTime.now(),
+      createdAt: effectiveCreatedAt,
       merchant: merchant,
     );
     _db.execute('BEGIN IMMEDIATE;');
@@ -359,6 +373,7 @@ class Store {
         balanceAfterMinor: newBalance,
         status: status,
         merchant: merchant,
+        createdAt: effectiveCreatedAt,
       );
       _db.execute(
         'UPDATE accounts SET balance_minor = ?, available_minor = ? WHERE id = ?',

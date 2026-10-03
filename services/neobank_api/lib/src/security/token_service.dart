@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
@@ -48,7 +49,8 @@ class TokenService {
 
   /// Refresh token opaco: se devuelve en claro al cliente y se persiste su hash.
   String generateRefreshToken() {
-    final bytes = List<int>.generate(48, (i) => DateTime.now().microsecond ^ i * 31);
+    final random = Random.secure();
+    final bytes = List<int>.generate(48, (_) => random.nextInt(256));
     return base64Url.encode(bytes);
   }
 

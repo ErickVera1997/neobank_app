@@ -1,34 +1,36 @@
 import 'dart:io';
 
-import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart';
-import 'package:shelf_router/shelf_router.dart';
+import 'package:neobank_api/src/api/router.dart';
+import 'package:neobank_api/src/app.dart';
+import 'package:neobank_api/src/config.dart';
+import 'package:neobank_api/src/data/seed.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
 
-// Configure routes.
-final _router = Router()
-  ..get('/', _rootHandler)
-  ..get('/echo/<message>', _echoHandler);
+Future<void> main(List<String> args) async {
+  final config = AppConfig.fromEnvironment();
+  final app = AppContainer.create(config);
+  final handler = buildHandler(app);
 
-Response _rootHandler(Request req) {
-  return Response.ok('Hello, World!\n');
-}
+  final server = await shelf_io.serve(
+    handler,
+    InternetAddress.anyIPv4,
+    config.port,
+  );
+  server.autoCompress = true;
 
-Response _echoHandler(Request request) {
-  final message = request.params['message'];
-  return Response.ok('$message\n');
-}
+  stdout
+    ..writeln('Neobank API escuchando en '
+        'http://${server.address.address}:${server.port} '
+        '(env=${config.environment})')
+    ..writeln('Usuario demo: ${SeedData.demoEmail} / ${SeedData.demoPassword}');
 
-void main(List<String> args) async {
-  // Use any available host or container IP (usually `0.0.0.0`).
-  final ip = InternetAddress.anyIPv4;
+  Future<void> shutdown() async {
+    stdout.writeln('Apagando...');
+    await server.close(force: true);
+    app.dispose();
+    exit(0);
+  }
 
-  // Configure a pipeline that logs requests.
-  final handler = Pipeline()
-      .addMiddleware(logRequests())
-      .addHandler(_router.call);
-
-  // For running in containers, we respect the PORT environment variable.
-  final port = int.parse(Platform.environment['PORT'] ?? '8080');
-  final server = await serve(handler, ip, port);
-  print('Server listening on port ${server.port}');
+  ProcessSignal.sigint.watch().listen((_) => shutdown());
+  ProcessSignal.sigterm.watch().listen((_) => shutdown());
 }
