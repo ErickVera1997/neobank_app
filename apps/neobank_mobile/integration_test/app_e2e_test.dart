@@ -18,6 +18,8 @@ class _FakeBackend {
     final path = options.uri.path;
     if (path.contains('/auth/login')) return _session();
     if (path.contains('/config/bootstrap')) return _bootstrap();
+    if (path.endsWith('/insights')) return _insights();
+    if (path.endsWith('/assistant')) return _assistant();
     if (path.contains('/accounts/') && path.endsWith('/transactions')) {
       return _transactions();
     }
@@ -88,7 +90,17 @@ class _FakeBackend {
             'type': 'quickActions',
             'priority': 20,
             'config': {
-              'items': ['transfer', 'pay', 'topup', 'fx'],
+              'items': ['transfer', 'assistant', 'insights', 'fx'],
+            },
+          },
+          {
+            'id': 'assistant',
+            'type': 'assistant',
+            'priority': 25,
+            'title': 'Copiloto financiero',
+            'subtitle': 'Pregúntame por tus finanzas',
+            'config': {
+              'examples': ['¿Cuál es mi saldo?', '¿Cuánto gasté este mes?'],
             },
           },
           {
@@ -194,6 +206,54 @@ class _FakeBackend {
         'fetchedAt': '2026-10-01T12:00:00.000Z',
         'stale': false,
       });
+
+  ResponseBody _insights() => _json({
+        'periodStart': '2026-10-01T00:00:00.000Z',
+        'periodEnd': '2026-11-01T00:00:00.000Z',
+        'income': {'minorUnits': 3200000, 'currency': 'USD'},
+        'expenses': {'minorUnits': 831200, 'currency': 'USD'},
+        'net': {'minorUnits': 2368800, 'currency': 'USD'},
+        'currency': 'USD',
+        'byCategory': [
+          {
+            'category': 'groceries',
+            'amount': {'minorUnits': 651200, 'currency': 'USD'},
+            'share': 0.78,
+            'transactions': 2,
+          },
+        ],
+        'topMerchants': [
+          {
+            'merchant': 'Supermaxi',
+            'amount': {'minorUnits': 651200, 'currency': 'USD'},
+          },
+        ],
+        'savingsRate': 0.74,
+        'changeVsPrevious': -0.12,
+        'transactionCount': 12,
+        'messages': [
+          {
+            'id': 'top_category',
+            'title': 'Tu mayor gasto: supermercado',
+            'body': r'$6,512.00 este mes (78% del total).',
+            'tone': 'neutral',
+            'action': '¿Cuánto gasté en groceries?',
+          },
+        ],
+        'generatedAt': '2026-10-03T12:00:00.000Z',
+      });
+
+  ResponseBody _assistant() => _json({
+        'reply': r'Tu saldo total es $16,000.00 en 1 cuentas.',
+        'intent': 'balance',
+        'suggestions': ['¿Cuánto gasté este mes?'],
+        'card': {
+          'type': 'balance',
+          'title': 'Saldo consolidado',
+          'subtitle': '1 cuentas',
+          'amount': {'minorUnits': 1600000, 'currency': 'USD'},
+        },
+      });
 }
 
 class _FakeAdapter implements HttpClientAdapter {
@@ -258,7 +318,17 @@ void main() {
     expect(find.text(r'$16,000.00'), findsWidgets);
     expect(find.text('Conversión de divisas'), findsOneWidget);
 
-    // 4) Navegar a cuentas y abrir el detalle.
+    // 4) Copiloto financiero: responde con datos reales del usuario.
+    final prompt = find.text('¿Cuál es mi saldo?').first;
+    await tester.ensureVisible(prompt);
+    await tester.tap(prompt);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Tu saldo total'), findsOneWidget);
+    expect(find.text('Saldo consolidado'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // 5) Navegar a cuentas y abrir el detalle.
     await tester.tap(find.text('Cuentas'));
     await tester.pumpAndSettle();
     expect(find.text('Mis cuentas'), findsOneWidget);
