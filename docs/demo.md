@@ -9,9 +9,9 @@ Guía paso a paso para probar la app y verificar los criterios del reto.
 make api              # → http://localhost:8080
 
 # Terminal 2 — app
-make app              # o con URL explícita:
-# flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080   (Android)
-# flutter run --dart-define=API_BASE_URL=http://localhost:8080  (iOS)
+make app              # la URL del backend se detecta por plataforma
+# Android emulator → 10.0.2.2 · iOS/macOS → localhost
+# Opcional: flutter run --dart-define=API_BASE_URL=http://host:8080
 ```
 
 Usuario demo: **ana@neobank.com / Password123** (segmento *premium*).

@@ -74,11 +74,13 @@ Variables de entorno opcionales: `PORT`, `DB_PATH`, `JWT_SECRET`,
 cd apps/neobank_mobile
 flutter pub get
 
-# Android emulator (host = 10.0.2.2)
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
+# La URL del backend se detecta automáticamente por plataforma:
+#   Android emulator -> http://10.0.2.2:8080
+#   iOS / macOS      -> http://localhost:8080
+flutter run
 
-# iOS simulator (host = localhost)
-flutter run --dart-define=API_BASE_URL=http://localhost:8080
+# Opcional: forzar otra URL
+flutter run --dart-define=API_BASE_URL=https://api.staging.neobank.dev
 ```
 
 ### Usuario demo

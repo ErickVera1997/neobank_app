@@ -54,6 +54,15 @@ sesión y la UI. El escenario:
 ¿Por qué así? Ver **ADR-010** en `docs/decisions.md`: máxima fidelidad de
 código con determinismo total, sin depender de red ni credenciales.
 
+El mismo test admite un modo contra el **backend real** (Dio + red del
+dispositivo), útil para validar el camino completo en un emulador:
+
+```bash
+# Con el backend corriendo en el host:
+flutter test integration_test/app_e2e_test.dart -d <device-id> \
+  --dart-define=REAL_BACKEND=true
+```
+
 ## Escenarios de degradación cubiertos por pruebas
 
 | Escenario | Dónde se prueba |
