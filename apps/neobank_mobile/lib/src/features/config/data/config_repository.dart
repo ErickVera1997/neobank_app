@@ -12,6 +12,24 @@ class BootstrapResult {
     this.cachedAt,
   });
 
+  /// Bootstrap neutro para cuando no hay sesión (no dispara red).
+  factory BootstrapResult.unauthenticated() => BootstrapResult(
+        bootstrap: AppBootstrap(
+          user: User(
+            id: 'guest',
+            name: 'Invitado',
+            email: '',
+            segment: UserSegment.standard,
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+          version: 'guest',
+          flags: const [],
+          home: const [],
+          offers: const [],
+          theme: const AppThemeConfig(),
+        ),
+      );
+
   final AppBootstrap bootstrap;
   final bool fromCache;
   final DateTime? cachedAt;

@@ -6,7 +6,16 @@ import '../data/accounts_repository.dart';
 
 /// Resumen consolidado de cuentas (con soporte offline).
 final accountsSummaryProvider = FutureProvider<AccountsResult>((ref) async {
-  ref.watch(currentUserIdProvider);
+  final userId = ref.watch(currentUserIdProvider);
+  if (userId == null) {
+    return AccountsResult(
+      summary: AccountsSummary(
+        accounts: const [],
+        totalBalance: Money.zero(),
+        currency: 'USD',
+      ),
+    );
+  }
   return ref.read(accountsRepositoryProvider).summary();
 });
 

@@ -9,7 +9,10 @@ import '../data/notifications_repository.dart';
 class NotificationsController extends AsyncNotifier<NotificationsResult> {
   @override
   Future<NotificationsResult> build() async {
-    ref.watch(currentUserIdProvider);
+    final userId = ref.watch(currentUserIdProvider);
+    if (userId == null) {
+      return const NotificationsResult(items: [], unreadCount: 0);
+    }
     return ref.read(notificationsRepositoryProvider).list();
   }
 

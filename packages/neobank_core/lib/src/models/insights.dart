@@ -138,6 +138,23 @@ class SpendingInsights {
         generatedAt: generatedAt,
       );
 
+  /// Analítica vacía (usada cuando no hay sesión autenticada).
+  factory SpendingInsights.empty({String currency = 'USD'}) => SpendingInsights(
+        periodStart: DateTime.now(),
+        periodEnd: DateTime.now(),
+        income: Money.zero(currency),
+        expenses: Money.zero(currency),
+        net: Money.zero(currency),
+        currency: currency,
+        byCategory: const [],
+        topMerchants: const [],
+        savingsRate: 0,
+        changeVsPrevious: 0,
+        transactionCount: 0,
+        messages: const [],
+        generatedAt: DateTime.now(),
+      );
+
   factory SpendingInsights.fromJson(Map<String, dynamic> json) =>
       SpendingInsights(
         periodStart: jsonDate(json, 'periodStart'),

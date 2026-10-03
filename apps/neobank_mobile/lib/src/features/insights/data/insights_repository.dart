@@ -25,6 +25,9 @@ final insightsRepositoryProvider = Provider<InsightsRepository>(
 );
 
 final insightsProvider = FutureProvider<SpendingInsights>((ref) {
-  ref.watch(currentUserIdProvider);
+  final userId = ref.watch(currentUserIdProvider);
+  if (userId == null) {
+    return Future.value(SpendingInsights.empty());
+  }
   return ref.read(insightsRepositoryProvider).monthly();
 });

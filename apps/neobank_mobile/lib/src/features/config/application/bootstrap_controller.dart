@@ -8,7 +8,8 @@ import '../data/config_repository.dart';
 class BootstrapController extends AsyncNotifier<BootstrapResult> {
   @override
   Future<BootstrapResult> build() async {
-    ref.watch(currentUserIdProvider);
+    final userId = ref.watch(currentUserIdProvider);
+    if (userId == null) return BootstrapResult.unauthenticated();
     return ref.read(configRepositoryProvider).bootstrap();
   }
 

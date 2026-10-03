@@ -282,24 +282,30 @@ Dio _fakeDio(_FakeBackend backend) {
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  /// Con `--dart-define=REAL_BACKEND=true` el E2E usa el backend real
+  /// (Dio + red del dispositivo) en lugar del adaptador HTTP falso.
+  const useRealBackend = bool.fromEnvironment('REAL_BACKEND');
+
   testWidgets('E2E: login, home personalizado y movimientos de una cuenta',
       (tester) async {
     final backend = _FakeBackend();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          appConfigProvider.overrideWithValue(
-            const AppConfig(
-              apiBaseUrl: 'http://fake.local',
-              requestTimeout: Duration(seconds: 5),
-              simulatorEnabled: false,
-            ),
-          ),
-          dioProvider.overrideWithValue(_fakeDio(backend)),
-          refreshDioProvider.overrideWithValue(_fakeDio(backend)),
           tokenStoreProvider.overrideWithValue(InMemoryTokenStore()),
           cacheStoreProvider.overrideWithValue(InMemoryCacheStore()),
           deviceOnlineProvider.overrideWith((ref) => Stream.value(true)),
+          if (!useRealBackend) ...[
+            appConfigProvider.overrideWithValue(
+              const AppConfig(
+                apiBaseUrl: 'http://fake.local',
+                requestTimeout: Duration(seconds: 5),
+                simulatorEnabled: false,
+              ),
+            ),
+            dioProvider.overrideWithValue(_fakeDio(backend)),
+            refreshDioProvider.overrideWithValue(_fakeDio(backend)),
+          ],
         ],
         child: const NeobankApp(),
       ),
@@ -315,7 +321,7 @@ void main() {
 
     // 3) Home personalizado por el backend (hero + módulos).
     expect(find.text('Hola, Ana'), findsOneWidget);
-    expect(find.text(r'$16,000.00'), findsWidgets);
+    expect(find.text('Tu dinero'), findsOneWidget);
     expect(find.text('Conversión de divisas'), findsOneWidget);
 
     // 4) Copiloto financiero: responde con datos reales del usuario.
