@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/accounts/presentation/account_detail_screen.dart';
 import '../features/accounts/presentation/accounts_screen.dart';
+import '../features/assistant/presentation/assistant_screen.dart';
 import '../features/auth/application/auth_controller.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/otp_screen.dart';
@@ -11,6 +12,7 @@ import '../features/auth/presentation/register_screen.dart';
 import '../features/auth/presentation/splash_screen.dart';
 import '../features/fx/presentation/fx_screen.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/insights/presentation/insights_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/settings/presentation/network_simulator_screen.dart';
@@ -77,6 +79,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/transfer', builder: (_, __) => const TransferScreen()),
+      GoRoute(
+        path: '/assistant',
+        builder: (_, state) => AssistantScreen(
+          initialPrompt: state.uri.queryParameters['q'],
+        ),
+      ),
+      GoRoute(path: '/insights', builder: (_, __) => const InsightsScreen()),
       GoRoute(
         path: '/settings',
         builder: (_, __) => const NetworkSimulatorScreen(),

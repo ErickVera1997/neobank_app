@@ -8,6 +8,7 @@ import '../../../shared/widgets/app_widgets.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../config/application/bootstrap_controller.dart';
 import '../../fx/data/fx_repository.dart';
+import '../../insights/data/insights_repository.dart';
 
 /// Tarjeta principal con el saldo consolidado.
 class HeroBalanceModule extends ConsumerWidget {
@@ -154,9 +155,11 @@ class QuickActionsModule extends StatelessWidget {
 
   static const Map<String, (IconData, String, String?)> _catalog = {
     'transfer': (Icons.swap_horiz_rounded, 'Transferir', '/transfer'),
+    'assistant': (Icons.auto_awesome_rounded, 'Copiloto', '/assistant'),
+    'insights': (Icons.insights_rounded, 'Análisis', '/insights'),
+    'fx': (Icons.currency_exchange_rounded, 'Divisas', '/fx'),
     'pay': (Icons.receipt_long_rounded, 'Pagar', null),
     'topup': (Icons.add_card_rounded, 'Recargar', null),
-    'fx': (Icons.currency_exchange_rounded, 'Divisas', '/fx'),
   };
 
   @override
@@ -223,6 +226,90 @@ class _QuickActionButton extends StatelessWidget {
             Text(label, style: Theme.of(context).textTheme.labelMedium),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Acceso al copiloto financiero con preguntas sugeridas por el backend.
+class AssistantModule extends StatelessWidget {
+  const AssistantModule({required this.module, super.key});
+
+  final HomeModule module;
+
+  static const List<String> _fallbackExamples = [
+    '¿Cuál es mi saldo?',
+    '¿Cuánto gasté este mes?',
+    '¿Cuánto es 100 USD en EUR?',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final examples = (module.config['examples'] as List<dynamic>?)
+            ?.map((value) => value.toString())
+            .toList() ??
+        _fallbackExamples;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.auto_awesome_rounded,
+                color: scheme.onSecondaryContainer,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      module.title ?? 'Copiloto financiero',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onSecondaryContainer,
+                      ),
+                    ),
+                    if (module.subtitle != null)
+                      Text(
+                        module.subtitle!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: scheme.onSecondaryContainer,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: examples
+                .take(3)
+                .map(
+                  (example) => ActionChip(
+                    label: Text(
+                      example,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    onPressed: () => context.push(
+                      '/assistant?q=${Uri.encodeComponent(example)}',
+                    ),
+                  ),
+                )
+                .toList(growable: false),
+          ),
+        ],
       ),
     );
   }
@@ -388,9 +475,18 @@ class _OfferCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Oferta: ${offer.title}')),
-                ),
+                onPressed: () {
+                  final action = offer.ctaAction;
+                  if (action != null && action.isNotEmpty) {
+                    context.push(
+                      '/assistant?q=${Uri.encodeComponent(action)}',
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Oferta: ${offer.title}')),
+                    );
+                  }
+                },
                 child: Text(offer.ctaLabel!),
               ),
             ),
@@ -412,6 +508,7 @@ class InsightsModule extends ConsumerWidget {
     final account = _primaryAccount(summary?.accounts);
     if (account == null) return const SizedBox.shrink();
     final transactions = ref.watch(transactionsProvider(account.id));
+    final insights = ref.watch(insightsProvider).value;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -452,6 +549,18 @@ class InsightsModule extends ConsumerWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (insights != null && insights.messages.isNotEmpty) ...[
+                      Text(
+                        insights.messages.first.title,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        insights.messages.first.body,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     SizedBox(
                       height: 64,
                       child: CustomPaint(
@@ -466,6 +575,13 @@ class InsightsModule extends ConsumerWidget {
                     Text(
                       'Ingresos recientes: ${Money(credits, account.currency).format()}',
                       style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => context.push('/insights'),
+                        child: const Text('Ver análisis completo'),
+                      ),
                     ),
                   ],
                 );

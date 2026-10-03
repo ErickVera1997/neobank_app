@@ -63,6 +63,7 @@ class HomeScreen extends ConsumerWidget {
       HomeModuleType.fxWidget => FxWidgetModule(module: module),
       HomeModuleType.offersCarousel => OffersModule(module: module),
       HomeModuleType.insights => InsightsModule(module: module),
+      HomeModuleType.assistant => AssistantModule(module: module),
       HomeModuleType.promo => PromoModule(module: module),
       HomeModuleType.custom => const SizedBox.shrink(),
     };
