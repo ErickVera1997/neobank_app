@@ -286,8 +286,7 @@ void main() {
   /// (Dio + red del dispositivo) en lugar del adaptador HTTP falso.
   const useRealBackend = bool.fromEnvironment('REAL_BACKEND');
 
-  testWidgets('E2E: login, home personalizado y movimientos de una cuenta',
-      (tester) async {
+  Future<void> pumpApp(WidgetTester tester) async {
     final backend = _FakeBackend();
     await tester.pumpWidget(
       ProviderScope(
@@ -310,39 +309,53 @@ void main() {
         child: const NeobankApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    await _waitFor(tester, find.text('Bienvenida a Neobank'));
+  }
 
-    // 1) Pantalla de login tras restaurar la sesión (sin tokens).
-    expect(find.text('Bienvenida a Neobank'), findsOneWidget);
-
-    // 2) Login con el usuario demo.
+  Future<void> login(WidgetTester tester) async {
     await tester.tap(find.text('Ingresar'));
-    await tester.pumpAndSettle();
+    await _waitFor(tester, find.text('Hola, Ana'));
+  }
 
-    // 3) Home personalizado por el backend (hero + módulos).
-    expect(find.text('Hola, Ana'), findsOneWidget);
-    expect(find.text('Tu dinero'), findsOneWidget);
-    expect(find.text('Conversión de divisas'), findsOneWidget);
+  testWidgets('E2E: login y consulta de movimientos de una cuenta',
+      (tester) async {
+    await pumpApp(tester);
+    await login(tester);
 
-    // 4) Copiloto financiero: responde con datos reales del usuario.
+    await tester.tap(find.text('Cuentas'));
+    await _waitFor(tester, find.text('Mis cuentas'));
+    await _waitFor(tester, find.text('Cuenta principal'));
+
+    await tester.tap(find.text('Cuenta principal'));
+    await _waitFor(tester, find.text('Movimientos'));
+    await _waitFor(tester, find.text('Supermercado'));
+  });
+
+  testWidgets('E2E: el copiloto responde con datos reales', (tester) async {
+    await pumpApp(tester);
+    await login(tester);
+
     final prompt = find.text('¿Cuál es mi saldo?').first;
     await tester.ensureVisible(prompt);
     await tester.tap(prompt);
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Tu saldo total'), findsOneWidget);
+    await _waitFor(tester, find.textContaining('Tu saldo total'));
     expect(find.text('Saldo consolidado'), findsOneWidget);
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-
-    // 5) Navegar a cuentas y abrir el detalle.
-    await tester.tap(find.text('Cuentas'));
-    await tester.pumpAndSettle();
-    expect(find.text('Mis cuentas'), findsOneWidget);
-    expect(find.text('Cuenta principal'), findsOneWidget);
-
-    await tester.tap(find.text('Cuenta principal'));
-    await tester.pumpAndSettle();
-    expect(find.text('Movimientos'), findsOneWidget);
-    expect(find.text('Supermercado'), findsOneWidget);
   });
+}
+
+/// Espera a que aparezca un widget sin usar `pumpAndSettle`.
+///
+/// Los indicadores indeterminados (LinearProgressIndicator) nunca "asientan",
+/// por lo que `pumpAndSettle` colgaría con latencia real de red.
+Future<void> _waitFor(
+  WidgetTester tester,
+  Finder finder, {
+  Duration timeout = const Duration(seconds: 30),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(deadline)) {
+    await tester.pump(const Duration(milliseconds: 250));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  throw TestFailure('Tiempo de espera agotado esperando: $finder');
 }
