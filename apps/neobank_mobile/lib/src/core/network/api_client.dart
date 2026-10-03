@@ -98,7 +98,9 @@ class ApiClient {
         return await send();
       } on DioException catch (error) {
         if (error.response?.statusCode == 401 && allowRefresh) {
-          if (await _refreshSession()) {
+          final hadAuth =
+              error.requestOptions.headers.containsKey('Authorization');
+          if (hadAuth && await _refreshSession()) {
             return _send(send, allowRefresh: false);
           }
         }

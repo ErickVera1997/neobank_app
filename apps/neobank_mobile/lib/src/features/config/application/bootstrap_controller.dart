@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neobank_core/neobank_core.dart';
 
+import '../../../core/error/app_exception.dart';
 import '../../auth/application/auth_controller.dart';
 import '../data/config_repository.dart';
 
@@ -14,6 +15,10 @@ class BootstrapController extends AsyncNotifier<BootstrapResult> {
   }
 
   Future<void> refresh() async {
+    if (ref.read(currentUserIdProvider) == null) {
+      state = AsyncData(BootstrapResult.unauthenticated());
+      return;
+    }
     state = const AsyncLoading();
     state = await AsyncValue.guard(
       () => ref.read(configRepositoryProvider).bootstrap(),
@@ -24,9 +29,18 @@ class BootstrapController extends AsyncNotifier<BootstrapResult> {
 final bootstrapProvider =
     AsyncNotifierProvider<BootstrapController, BootstrapResult>(
   BootstrapController.new,
+  retry: (retryCount, error) {
+    if (error is AppException && error.kind == AppErrorKind.unauthorized) {
+      return null;
+    }
+    return ProviderContainer.defaultRetry(retryCount, error);
+  },
 );
 
 final themeConfigProvider = Provider<AppThemeConfig>((ref) {
+  if (ref.watch(currentUserIdProvider) == null) {
+    return const AppThemeConfig();
+  }
   return ref.watch(bootstrapProvider).value?.bootstrap.theme ??
       const AppThemeConfig();
 });

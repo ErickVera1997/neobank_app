@@ -125,14 +125,18 @@ void main() {
       await tokens.write(_tokens());
       var attempts = 0;
 
+      final dio = _dio((options) async {
+        expect(options.headers['Authorization'], isNotNull);
+        attempts++;
+        if (attempts == 1) {
+          return _json({'code': 'unauthorized'}, status: 401);
+        }
+        return _json({'ok': true});
+      });
+      dio.interceptors.add(AuthHeaderInterceptor(tokens));
+
       final client = ApiClient(
-        dio: _dio((options) async {
-          attempts++;
-          if (attempts == 1) {
-            return _json({'code': 'unauthorized'}, status: 401);
-          }
-          return _json({'ok': true});
-        }),
+        dio: dio,
         refreshDio: _dio((_) async => _json(_sessionJson())),
         tokens: tokens,
         cache: InMemoryCacheStore(),
@@ -142,6 +146,35 @@ void main() {
       expect(result.data['ok'], isTrue);
       expect(attempts, 2);
       expect((await tokens.read())?.accessToken, 'access-2');
+    });
+
+    test('un 401 sin Authorization no borra una sesión recién guardada', () async {
+      final tokens = InMemoryTokenStore();
+      var attempts = 0;
+
+      final client = ApiClient(
+        dio: _dio((options) async {
+          attempts++;
+          expect(options.headers['Authorization'], isNull);
+          return _json({'code': 'unauthorized'}, status: 401);
+        }),
+        refreshDio: _dio((_) async {
+          fail('no debe refrescar una petición anónima');
+        }),
+        tokens: tokens,
+        cache: InMemoryCacheStore(),
+      );
+
+      await tokens.write(_tokens());
+      await expectLater(
+        client.getJson('/config/bootstrap'),
+        throwsA(
+          isA<AppException>()
+              .having((e) => e.kind, 'kind', AppErrorKind.unauthorized),
+        ),
+      );
+      expect(attempts, 1);
+      expect((await tokens.read())?.accessToken, 'access-1');
     });
 
     test('reintenta errores transitorios 5xx', () async {
