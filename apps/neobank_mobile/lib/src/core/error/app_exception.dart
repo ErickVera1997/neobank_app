@@ -36,13 +36,15 @@ class AppException implements Exception {
       case DioExceptionType.receiveTimeout:
         return const AppException(
           AppErrorKind.timeout,
-          'La operación tardó demasiado. Reintenta.',
+          'Tiempo de conexión agotado. Verifica que el backend esté '
+          'disponible y tu red.',
           code: 'timeout',
         );
       case DioExceptionType.connectionError:
         return const AppException(
           AppErrorKind.offline,
-          'Sin conexión. Revisa tu red e inténtalo de nuevo.',
+          'Sin conexión al servidor. Revisa tu red y que el backend '
+          'esté en ejecución.',
           code: 'offline',
         );
       case DioExceptionType.badCertificate:

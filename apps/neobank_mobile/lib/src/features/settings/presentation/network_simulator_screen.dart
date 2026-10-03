@@ -27,6 +27,13 @@ class NetworkSimulatorScreen extends ConsumerWidget {
               subtitle: Text(deviceOnline ? 'En línea' : 'Sin conexión'),
             ),
           ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.dns_outlined),
+              title: const Text('Servidor (API)'),
+              subtitle: Text(ref.watch(appConfigProvider).apiBaseUrl),
+            ),
+          ),
           const SizedBox(height: 16),
           SwitchListTile(
             value: conditions.offline,
