@@ -12,6 +12,11 @@ evolucionar hacia múltiples dominios administrados por equipos independientes.
   con refresh rotativo.
 - **Cuentas**: saldo consolidado, detalle por cuenta y movimientos con
   paginación por cursor.
+- **Copiloto financiero**: asistente en la app que responde con tus datos
+  reales (saldos, gastos por categoría, movimientos) y FX en vivo.
+- **Análisis dinámico**: insights generados de tus movimientos (categorías,
+  comercios, tasa de ahorro, tendencia mensual) y ofertas basadas en tu
+  comportamiento.
 - **Personalización dinámica**: el backend define módulos del home, ofertas,
   feature flags y tema por **segmento** (Server-Driven UI).
 - **Micro-app de divisas (FX)**: tasas reales de un proveedor externo, caché y
@@ -40,6 +45,14 @@ neobank_app/
 - Xcode (iOS) y/o Android Studio (Android)
 - No se requieren servicios de pago ni credenciales: el backend vive en el
   repo y la integración FX usa una API pública real.
+
+## 🎁 Bonus implementados
+
+| Bonus del reto | Implementación |
+| --- | --- |
+| Capacidades avanzadas de asistencia | **Copiloto financiero** con intención, datos reales y tarjetas estructuradas |
+| Experiencias generadas dinámicamente | Motor de **insights** + **ofertas por comportamiento** + Server-Driven UI |
+| Automatizaciones | `make` (setup/analyze/test/smoke/e2e), **smoke test E2E** del backend y job de CI |
 
 ## 🚀 Puesta en marcha
 
@@ -79,6 +92,14 @@ También puedes registrarte: se crea una cuenta con un bono de bienvenida.
 ## 🧪 Pruebas
 
 ```bash
+make ci        # analyze + tests + smoke test (recomendado)
+make test      # sólo pruebas
+make smoke     # smoke E2E del backend, incluye FX en vivo
+```
+
+O manualmente:
+
+```bash
 # Contratos
 cd packages/neobank_core && dart test
 
@@ -108,6 +129,7 @@ Perfil → **Simulador de red**:
 
 | Documento | Contenido |
 | --- | --- |
+| [`docs/demo.md`](docs/demo.md) | **Guion paso a paso para la demostración** |
 | [`docs/architecture.md`](docs/architecture.md) | Componentes, flujos, supuestos, riesgos y escalamiento |
 | [`docs/decisions.md`](docs/decisions.md) | ADRs: problema, alternativas, trade-offs e impacto |
 | [`docs/operations.md`](docs/operations.md) | Despliegue, observabilidad, SLOs y runbook |

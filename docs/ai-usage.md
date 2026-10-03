@@ -75,8 +75,19 @@
 
 ### Pruebas
 
-- 12 pruebas en `neobank_core`, 22 en el backend y 14 en la app (incluido el
+- 12 pruebas en `neobank_core`, **30 en el backend** y 14 en la app (incluido el
   E2E), todas ejecutables sin credenciales externas.
+- El **smoke test** (`make smoke`) se usó como verificación de cierre de cada
+  incremento del bonus: levanta el servidor real y valida el flujo completo.
+
+### Bonus acelerados con IA
+
+- **Motor de insights** (agregados, mensajes y ofertas por comportamiento) y
+  **copiloto financiero** (detección de intención, tarjetas estructuradas)
+  se diseñaron e implementaron en una sola iteración, con 8 pruebas nuevas
+  derivadas de los escenarios que la IA propuso y el humano validó.
+- **Automatizaciones**: el smoke test E2E, el `Makefile` y el job de CI se
+  generaron y verificaron ejecutándose de verdad contra el proveedor FX.
 
 ## 4. Guardias y verificación humana
 

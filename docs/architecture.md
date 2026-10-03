@@ -98,9 +98,21 @@ flowchart TB
 ```
 
 Cada feature es **autónoma**: `auth`, `config`, `home`, `accounts`, `fx`,
-`transfers`, `notifications`, `profile`, `settings`. La comunicación entre
-features ocurre sólo a través de providers públicos, no de imports cruzados de
-UI.
+`transfers`, `notifications`, `insights`, `assistant`, `profile`, `settings`.
+La comunicación entre features ocurre sólo a través de providers públicos, no
+de imports cruzados de UI.
+
+### Motor de analítica y copiloto (backend)
+
+```mermaid
+flowchart LR
+    Tx["transacciones\n(SQLite)"] --> Insights["InsightsService\nagregados + mensajes"]
+    Insights --> Offers["Ofertas por\ncomportamiento"]
+    Insights --> Assistant["AssistantService"]
+    Fx["FxService\n(proveedor real)"] --> Assistant
+    Assistant --> API["/assistant"]
+    Insights --> API2["/insights"]
+```
 
 ## 5. Flujos clave
 
@@ -169,6 +181,22 @@ flowchart TD
     F -->|no| H["503 service_unavailable"]
 ```
 
+### 5.5 Copiloto financiero
+
+```mermaid
+sequenceDiagram
+    participant App as App
+    participant API as API
+    participant I as InsightsService
+    participant FX as Proveedor FX
+    App->>API: POST /assistant {"¿Cuánto gasté este mes?"}
+    API->>I: agrega los movimientos del usuario
+    I-->>API: totales y categorías reales
+    API->>FX: (si el intent es conversión) tasas en vivo
+    FX-->>API: tasas
+    API-->>App: reply + tarjeta estructurada + sugerencias
+```
+
 ## 6. Personalización y segmentación
 
 | Mecanismo | Implementación | Sin publicar app |
@@ -176,7 +204,7 @@ flowchart TD
 | Segmentos | `youth · standard · premium · pyme` en el usuario | ✅ |
 | Feature flags | Tabla `feature_flags` filtrada por segmento | ✅ |
 | Server-Driven UI | Lista ordenada de módulos de home | ✅ |
-| Ofertas | Catálogo por segmento | ✅ |
+| Ofertas | Catálogo por segmento **+ generadas por comportamiento** | ✅ |
 | Tema | Tokens de color/modo por segmento | ✅ |
 | Experimentos | `experimentBucket` A/B en el bootstrap | ✅ |
 
@@ -253,4 +281,17 @@ controlados registrados con stack trace.
 ## 13. Pruebas
 
 Estrategia y comandos en [`testing.md`](testing.md): pirámide con unitarias
-(core/backend/app), widgets y un flujo **E2E** crítico.
+(core/backend/app), widgets y un flujo **E2E** crítico que además cubre el
+copiloto.
+
+## 14. Automatizaciones
+
+| Automatización | Comando | Qué hace |
+| --- | --- | --- |
+| Atajos de desarrollo | `make help` | Instala, analiza, prueba, levanta y formatea |
+| Smoke E2E del backend | `make smoke` | Levanta el server real en un puerto efímero y recorre login, cuentas, transferencia, insights, copiloto, home y FX en vivo |
+| CI | `.github/workflows/ci.yml` | `analyze` + `test` de los 3 paquetes + job de smoke |
+| E2E de la app | `make e2e` | Flujo login → home → copiloto → cuentas → movimientos |
+
+El smoke test es la evidencia reproducible del funcionamiento del sistema con
+**dependencias externas reales**.

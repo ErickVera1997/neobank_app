@@ -242,3 +242,59 @@ repositorio.
 
 **Impacto a largo plazo.** El mismo patrón permite *contract tests*: el
 adaptador puede alimentarse desde grabaciones del backend real.
+
+---
+
+## ADR-011 · Copiloto financiero determinista (con extensión a LLM)
+
+**Problema.** Ofrecer asistencia avanzada dentro de la app sin atar la demo a
+credenciales, coste o latencia de un proveedor de LLM, y sin sacrificar la
+exactitud de la información financiera.
+
+**Alternativas evaluadas.**
+1. **LLM externo directo**: conversación fluida, pero requiere API key, coste
+   por token, latencia variable y riesgo de respuestas incorrectas sobre dinero.
+2. **RAG clásico (LLM + datos)**: mejor precisión, pero añade vector store e
+   infraestructura no justificada para un alcance acotado.
+3. **Motor determinista de intención sobre datos reales**: respuestas exactas,
+   sin coste, auditables y con latencia mínima. La redacción es menos libre.
+
+**Opción seleccionada.** **Motor determinista** (`AssistantService`): detecta
+intención, agrega los datos reales del usuario (o consulta FX en vivo) y
+devuelve texto + tarjetas estructuradas. Se deja preparado el punto de
+extensión para delegar redacción/clasificación a un LLM.
+
+**Trade-offs.** Menor flexibilidad conversacional ante preguntas fuera del
+catálogo (responderá con ayuda). A cambio: cero coste, respuestas verificables
+y ninguna dependencia externa obligatoria.
+
+**Impacto a largo plazo.** Un LLM puede incorporarse más adelante como capa de
+*NLU/redacción* manteniendo el mismo contrato (`AssistantAnswer`), los mismos
+datos y las mismas pruebas; el riesgo se concentra en la capa que se puede
+apagar con una flag.
+
+---
+
+## ADR-012 · Automatización con smoke test E2E del backend
+
+**Problema.** El reto pide evidenciar interacción real y automatizaciones, pero
+un E2E completo depende de red, credenciales y despliegues.
+
+**Alternativas evaluadas.**
+1. **Solo tests unitarios/integración**: rápidos, pero no recorren el servidor
+   HTTP real ni el proveedor externo.
+2. **E2E manual documentado**: evidencia débil y no reproducible.
+3. **Smoke script que levanta el servidor real en proceso** (SQLite en memoria,
+   puerto efímero) y recorre los flujos por HTTP, incluido el proveedor FX.
+
+**Opción seleccionada.** `services/neobank_api/tool/smoke.dart`, expuesto como
+`make smoke` y como job de CI. El chequeo de FX es tolerante a entornos sin
+salida a Internet (advertencia, no fallo).
+
+**Trade-offs.** El resultado del proveedor externo no es determinista; se
+mitiga validando estructura y degradación en lugar de un valor fijo. A cambio:
+un comando reproduce la evidencia completa en cualquier máquina.
+
+**Impacto a largo plazo.** El mismo script sirve para validar *staging*
+cambiando `FX_BASE_URL` y es la base para *contract tests* y *synthetic
+monitoring* en producción (ver `operations.md`).

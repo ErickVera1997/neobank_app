@@ -80,6 +80,8 @@ flutter build ipa --release   --dart-define=API_BASE_URL=https://api.neobank.dev
 | `auth_refresh_failures_total` | contador | > 2 % de refrescos |
 | `push_delivery_failures_total` | contador | > 10 en 15 min |
 | `db_file_size_bytes` / `db_locked_total` | gauge/contador | crecimiento o locks anómalos |
+| `assistant_requests_total` / `assistant_latency_p95` | contador/histograma | degradación del copiloto |
+| `insights_generation_failures_total` | contador | > 0 en 15 min |
 
 ### 4.3 Trazas
 
@@ -142,4 +144,11 @@ En cada push a `main` y en cada PR:
 1. `neobank_core`: `dart analyze` + `dart test`.
 2. `neobank_api`: `dart analyze` + `dart test` (SQLite en memoria).
 3. `neobank_mobile`: `flutter analyze` + `flutter test`.
-4. (Opcional) E2E en emulador cuando haya runners disponibles.
+4. **Smoke E2E**: levanta el servidor real y recorre login, cuentas,
+   transferencia, insights, copiloto, home y FX en vivo.
+5. (Opcional) E2E en emulador cuando haya runners disponibles.
+
+En local, todo lo anterior en un comando: `make ci`.
+La automatización de smoke es también la base para *synthetic monitoring*:
+programar `dart run tool/smoke.dart` contra staging y alertar si algún paso
+falla (ver métricas más arriba).

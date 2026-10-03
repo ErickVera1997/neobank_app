@@ -13,8 +13,10 @@
 | Unit (core) | `packages/neobank_core/test` | `Money`, `Result`, parseo JSON, modelos | `dart test` |
 | Unit + integración (backend) | `services/neobank_api/test` | PBKDF2, JWT, FX con proveedor caído, API completa sobre SQLite en memoria | `dart test` |
 | Unit (app) | `apps/neobank_mobile/test/core` | Cliente HTTP: caché offline, refresh 401, reintentos 5xx | `flutter test` |
-| Widget | `apps/neobank_mobile/test/widget` | `MoneyText`, `ErrorView`, banner de conectividad, módulo de saldo, validación de login | `flutter test` |
-| E2E | `apps/neobank_mobile/integration_test` | login → home personalizado → cuentas → movimientos | ver abajo |
+| Unit (app) | `apps/neobank_mobile/test/features` | AuthController y AssistantController | `flutter test` |
+| Widget | `apps/neobank_mobile/test` | `MoneyText`, `ErrorView`, banner de conectividad, módulo de saldo, validación de login, panel de insights | `flutter test` |
+| E2E | `apps/neobank_mobile/integration_test` | login → home personalizado → **copiloto** → cuentas → movimientos | ver abajo |
+| Smoke (servidor real) | `services/neobank_api/tool/smoke.dart` | Login, cuentas, transferencia, insights, copiloto, home y **FX en vivo** | `dart run tool/smoke.dart` |
 
 ## Ejecutar todo
 
@@ -31,6 +33,9 @@ cd apps/neobank_mobile && flutter pub get && flutter analyze && flutter test
 # 4) E2E en un dispositivo/emulador
 flutter test integration_test/app_e2e_test.dart -d <device-id>
 ```
+
+Atajos: `make test` (todo lo anterior), `make smoke` (smoke del backend con
+servidor real y FX en vivo) y `make ci` (analyze + test + smoke).
 
 ## Flujo E2E crítico
 
