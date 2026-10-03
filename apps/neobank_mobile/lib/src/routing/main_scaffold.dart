@@ -1,0 +1,82 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../features/notifications/application/notifications_controller.dart';
+import '../shared/widgets/app_widgets.dart';
+
+/// Shell principal con barra de navegación inferior y banner de conectividad.
+class MainScaffold extends ConsumerWidget {
+  const MainScaffold({
+    required this.location,
+    required this.child,
+    super.key,
+  });
+
+  final String location;
+  final Widget child;
+
+  static const List<String> _routes = [
+    '/home',
+    '/accounts',
+    '/fx',
+    '/notifications',
+    '/profile',
+  ];
+
+  int get _index {
+    if (location.startsWith('/accounts')) return 1;
+    if (location.startsWith('/fx')) return 2;
+    if (location.startsWith('/notifications')) return 3;
+    if (location.startsWith('/profile')) return 4;
+    return 0;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unread = ref.watch(unreadNotificationsProvider);
+    return Scaffold(
+      body: Column(
+        children: [
+          const ConnectivityBanner(),
+          Expanded(child: child),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (index) => context.go(_routes[index]),
+        destinations: [
+          const NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+            label: 'Inicio',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.account_balance_wallet_outlined),
+            selectedIcon: Icon(Icons.account_balance_wallet_rounded),
+            label: 'Cuentas',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.currency_exchange_outlined),
+            selectedIcon: Icon(Icons.currency_exchange_rounded),
+            label: 'Divisas',
+          ),
+          NavigationDestination(
+            icon: Badge(
+              isLabelVisible: unread > 0,
+              label: Text('$unread'),
+              child: const Icon(Icons.notifications_none_rounded),
+            ),
+            selectedIcon: const Icon(Icons.notifications_rounded),
+            label: 'Alertas',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: 'Perfil',
+          ),
+        ],
+      ),
+    );
+  }
+}
