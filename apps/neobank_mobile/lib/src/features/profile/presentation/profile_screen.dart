@@ -93,7 +93,7 @@ class ProfileScreen extends ConsumerWidget {
                     title: const Text('Simulador de red'),
                     subtitle: const Text('Prueba offline, latencia y fallos'),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => context.go('/settings'),
+                    onTap: () => context.push('/settings'),
                   ),
                   ListTile(
                     leading: const Icon(Icons.cleaning_services_outlined),

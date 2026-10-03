@@ -35,47 +35,55 @@ class MainScaffold extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unread = ref.watch(unreadNotificationsProvider);
-    return Scaffold(
-      body: Column(
-        children: [
-          const ConnectivityBanner(),
-          Expanded(child: child),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (index) => context.go(_routes[index]),
-        destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Inicio',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet_rounded),
-            label: 'Cuentas',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.currency_exchange_outlined),
-            selectedIcon: Icon(Icons.currency_exchange_rounded),
-            label: 'Divisas',
-          ),
-          NavigationDestination(
-            icon: Badge(
-              isLabelVisible: unread > 0,
-              label: Text('$unread'),
-              child: const Icon(Icons.notifications_none_rounded),
+    // En pestañas distintas a Inicio, el botón "atrás" de Android vuelve a
+    // Inicio en lugar de cerrar la app.
+    return PopScope(
+      canPop: _index == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) context.go('/home');
+      },
+      child: Scaffold(
+        body: Column(
+          children: [
+            const ConnectivityBanner(),
+            Expanded(child: child),
+          ],
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _index,
+          onDestinationSelected: (index) => context.go(_routes[index]),
+          destinations: [
+            const NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
+              label: 'Inicio',
             ),
-            selectedIcon: const Icon(Icons.notifications_rounded),
-            label: 'Alertas',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Perfil',
-          ),
-        ],
+            const NavigationDestination(
+              icon: Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: Icon(Icons.account_balance_wallet_rounded),
+              label: 'Cuentas',
+            ),
+            const NavigationDestination(
+              icon: Icon(Icons.currency_exchange_outlined),
+              selectedIcon: Icon(Icons.currency_exchange_rounded),
+              label: 'Divisas',
+            ),
+            NavigationDestination(
+              icon: Badge(
+                isLabelVisible: unread > 0,
+                label: Text('$unread'),
+                child: const Icon(Icons.notifications_none_rounded),
+              ),
+              selectedIcon: const Icon(Icons.notifications_rounded),
+              label: 'Alertas',
+            ),
+            const NavigationDestination(
+              icon: Icon(Icons.person_outline_rounded),
+              selectedIcon: Icon(Icons.person_rounded),
+              label: 'Perfil',
+            ),
+          ],
+        ),
       ),
     );
   }

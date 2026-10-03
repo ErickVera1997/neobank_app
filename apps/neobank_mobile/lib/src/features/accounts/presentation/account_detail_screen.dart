@@ -52,7 +52,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               SectionHeader(
                 title: 'Movimientos',
                 action: TextButton(
-                  onPressed: () => context.go('/transfer'),
+                  onPressed: () => context.push('/transfer'),
                   child: const Text('Transferir'),
                 ),
               ),

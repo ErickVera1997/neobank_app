@@ -202,12 +202,16 @@ class _QuickActionButton extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
-        if (route != null) {
-          context.go(route!);
-        } else {
+        if (route == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('$label estará disponible pronto')),
           );
+        } else if (route == '/fx') {
+          // Divisas es una pestaña principal: se navega, no se apila.
+          context.go(route!);
+        } else {
+          // Pantallas secundarias: se apilan para permitir volver atrás.
+          context.push(route!);
         }
       },
       child: Padding(

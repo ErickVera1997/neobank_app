@@ -128,7 +128,7 @@ class _AccountTile extends StatelessWidget {
     return Card(
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        onTap: () => context.go('/accounts/${account.id}'),
+        onTap: () => context.push('/accounts/${account.id}'),
         leading: CircleAvatar(
           backgroundColor: scheme.secondaryContainer,
           child: Icon(_icon, color: scheme.onSecondaryContainer),
