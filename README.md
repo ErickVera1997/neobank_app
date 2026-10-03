@@ -1,58 +1,127 @@
-# Neobank — Digital Banking Platform
+# Neobank — Plataforma financiera digital
 
-Plataforma financiera digital de nueva generación construida en **Flutter**,
-con un backend real en **Dart** y una arquitectura modular preparada para
-evolucionar hacia múltiples dominios funcionales administrados por equipos
-independientes.
+Aplicación bancaria digital de nueva generación construida en **Flutter**, con
+un **backend real en Dart** y una arquitectura modular preparada para
+evolucionar hacia múltiples dominios administrados por equipos independientes.
 
-> Reto técnico Senior Front-End. Ver `docs/` para arquitectura, decisiones
-> (ADRs), estrategia de despliegue y operación.
+> Reto técnico Senior Front-End. Toda la documentación está en [`docs/`](docs/).
 
-## Estructura del repositorio
+## ✨ Capacidades
 
-```
+- **Onboarding y autenticación**: registro, login, OTP y restauración de sesión
+  con refresh rotativo.
+- **Cuentas**: saldo consolidado, detalle por cuenta y movimientos con
+  paginación por cursor.
+- **Personalización dinámica**: el backend define módulos del home, ofertas,
+  feature flags y tema por **segmento** (Server-Driven UI).
+- **Micro-app de divisas (FX)**: tasas reales de un proveedor externo, caché y
+  respuesta *stale* si el proveedor falla.
+- **Transferencias**: internas y a terceros, con notificación automática.
+- **Notificaciones**: centro in-app + registro de dispositivo y notificaciones
+  locales; gateway push desacoplado para FCM/APNs.
+- **Resiliencia**: caché offline, reintentos con backoff, refresh automático y
+  un **simulador de red** para demostrar degradación (offline/latencia/fallos).
+- **Pruebas**: unitarias, de widgets y un flujo E2E crítico.
+
+## 🧱 Estructura
+
+```text
 neobank_app/
-├── apps/
-│   └── neobank_mobile/     # App Flutter (Android / iOS) — Riverpod + features
-├── services/
-│   └── neobank_api/        # Backend Dart (shelf) + SQLite + JWT
-├── packages/
-│   └── neobank_core/       # Contratos, modelos y utilidades compartidas
-├── docs/                   # Arquitectura, ADRs, runbook, IA
-└── .github/workflows/      # CI
+├── apps/neobank_mobile/     # App Flutter (Android / iOS)
+├── services/neobank_api/    # Backend Dart (shelf + SQLite + JWT)
+├── packages/neobank_core/   # Contratos compartidos (DTOs, Money, Result)
+├── docs/                    # Arquitectura, decisiones, operación, pruebas, IA
+└── .github/workflows/       # CI
 ```
 
-## Requisitos
+## ✅ Requisitos
 
 - Flutter **3.47+** (Dart 3.13+)
-- Xcode / Android Studio para emuladores
-- No se requieren servicios externos de pago: el backend es parte del repo y la
-  integración FX usa una API pública real (Frankfurter).
+- Xcode (iOS) y/o Android Studio (Android)
+- No se requieren servicios de pago ni credenciales: el backend vive en el
+  repo y la integración FX usa una API pública real.
 
-## Puesta en marcha rápida
+## 🚀 Puesta en marcha
+
+### 1. Backend
 
 ```bash
-# 1) Backend (puerto 8080)
 cd services/neobank_api
 dart pub get
 dart run bin/server.dart
-
-# 2) App Flutter
-cd apps/neobank_mobile
-flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080   # Android emulator
-# iOS simulator: --dart-define=API_BASE_URL=http://localhost:8080
+# → http://localhost:8080
 ```
 
-Usuario demo: `ana@neobank.com` / `Password123`.
+Variables de entorno opcionales: `PORT`, `DB_PATH`, `JWT_SECRET`,
+`FX_BASE_URL`, `PUSH_WEBHOOK_URL`, `ENV`.
 
-Ver `README` por componente y `docs/` para el detalle.
+### 2. App Flutter
 
-## Versionamiento
+```bash
+cd apps/neobank_mobile
+flutter pub get
 
-**Trunk Based Development**: rama `main` siempre desplegable, commits pequeños
-y frecuentes, integración continua en cada push.
+# Android emulator (host = 10.0.2.2)
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 
-## Licencia
+# iOS simulator (host = localhost)
+flutter run --dart-define=API_BASE_URL=http://localhost:8080
+```
+
+### Usuario demo
+
+| Email | Contraseña |
+| --- | --- |
+| `ana@neobank.com` | `Password123` |
+
+También puedes registrarte: se crea una cuenta con un bono de bienvenida.
+
+## 🧪 Pruebas
+
+```bash
+# Contratos
+cd packages/neobank_core && dart test
+
+# Backend (SQLite en memoria)
+cd services/neobank_api && dart test
+
+# App (unit + widgets)
+cd apps/neobank_mobile && flutter test
+
+# E2E crítico (requiere un emulador/simulador)
+cd apps/neobank_mobile
+flutter test integration_test/app_e2e_test.dart -d <device-id>
+```
+
+Detalle de la estrategia y escenarios cubiertos: [`docs/testing.md`](docs/testing.md).
+
+## 🌐 Comportamiento degradado (demostración)
+
+Perfil → **Simulador de red**:
+
+- **Modo offline** → datos desde caché + banner superior.
+- **Latencia** (hasta 5 s) → estados de carga visibles.
+- **Tasa de fallos** → reintentos automáticos con backoff.
+- **Restaurar** → la app se recupera sin reiniciar.
+
+## 📚 Documentación
+
+| Documento | Contenido |
+| --- | --- |
+| [`docs/architecture.md`](docs/architecture.md) | Componentes, flujos, supuestos, riesgos y escalamiento |
+| [`docs/decisions.md`](docs/decisions.md) | ADRs: problema, alternativas, trade-offs e impacto |
+| [`docs/operations.md`](docs/operations.md) | Despliegue, observabilidad, SLOs y runbook |
+| [`docs/testing.md`](docs/testing.md) | Pirámide de pruebas y escenarios de degradación |
+| [`docs/ai-usage.md`](docs/ai-usage.md) | Uso de IA y su impacto |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Trunk Based Development y Conventional Commits |
+
+## 🤖 Desarrollo asistido por IA
+
+El repositorio incluye la configuración del plugin oficial de Dart/Flutter para
+agentes ([`flutter/agent-plugins`](https://github.com/flutter/agent-plugins)):
+25 skills en `.agents/skills`, MCP de Dart en `.opencode`/`.vscode` y reglas en
+`AGENTS.md`. Ver [`docs/ai-usage.md`](docs/ai-usage.md).
+
+## 📄 Licencia
 
 Uso exclusivo para evaluación técnica.
