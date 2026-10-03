@@ -212,6 +212,18 @@ class SeedData {
       variant: 'control',
       segments: all,
     );
+    _store.upsertFlag(
+      key: 'assistant',
+      enabled: true,
+      payload: const {
+        'examples': [
+          '¿Cuál es mi saldo?',
+          '¿Cuánto gasté este mes?',
+          '¿Cuánto es 100 USD en EUR?',
+        ],
+      },
+      segments: all,
+    );
   }
 
   void _setBalance(String accountId, int minor) {

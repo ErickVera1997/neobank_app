@@ -10,5 +10,7 @@ export 'src/data/store.dart';
 export 'src/domain/errors.dart';
 export 'src/security/password_hasher.dart';
 export 'src/security/token_service.dart';
+export 'src/services/assistant_service.dart';
 export 'src/services/fx_service.dart';
+export 'src/services/insights_service.dart';
 export 'src/services/notification_service.dart';

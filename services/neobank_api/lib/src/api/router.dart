@@ -6,9 +6,11 @@ import 'package:shelf_router/shelf_router.dart';
 
 import '../app.dart';
 import 'handlers/accounts_handler.dart';
+import 'handlers/assistant_handler.dart';
 import 'handlers/auth_handler.dart';
 import 'handlers/config_handler.dart';
 import 'handlers/fx_handler.dart';
+import 'handlers/insights_handler.dart';
 import 'handlers/notifications_handler.dart';
 import 'http_helpers.dart';
 import 'middleware.dart';
@@ -43,6 +45,8 @@ Handler buildHandler(AppContainer app) {
   final fx = FxHandler(app);
   final config = ConfigHandler(app);
   final notifications = NotificationsHandler(app);
+  final insights = InsightsHandler(app);
+  final assistant = AssistantHandler(app);
 
   final publicRouter = Router(notFoundHandler: _notFound)
     ..get('/health', (Request request) => _health(app))
@@ -62,6 +66,8 @@ Handler buildHandler(AppContainer app) {
     ..get(ApiPaths.fxRates, fx.rates)
     ..post(ApiPaths.fxConvert, fx.convert)
     ..get(ApiPaths.bootstrap, config.bootstrap)
+    ..get(ApiPaths.insights, insights.monthly)
+    ..post(ApiPaths.assistant, assistant.ask)
     ..get(ApiPaths.notifications, notifications.list)
     ..post('/notifications/<id>/read', notifications.markRead)
     ..post(ApiPaths.devices, devices.register);

@@ -37,6 +37,7 @@ enum HomeModuleType {
   fxWidget,
   offersCarousel,
   insights,
+  assistant,
   promo,
   custom;
 

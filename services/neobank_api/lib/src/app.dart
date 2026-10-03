@@ -6,7 +6,9 @@ import 'data/seed.dart';
 import 'data/store.dart';
 import 'security/password_hasher.dart';
 import 'security/token_service.dart';
+import 'services/assistant_service.dart';
 import 'services/fx_service.dart';
+import 'services/insights_service.dart';
 import 'services/notification_service.dart';
 
 /// Contenedor de dependencias del backend.
@@ -22,6 +24,8 @@ class AppContainer {
     required this.hasher,
     required this.fx,
     required this.notifications,
+    required this.insights,
+    required this.assistant,
     required this.httpClient,
     required this.ownsHttpClient,
   });
@@ -33,6 +37,8 @@ class AppContainer {
   final PasswordHasher hasher;
   final FxService fx;
   final NotificationService notifications;
+  final InsightsService insights;
+  final AssistantService assistant;
   final http.Client httpClient;
   final bool ownsHttpClient;
 
@@ -63,6 +69,8 @@ class AppContainer {
         ? const NoopPushGateway()
         : WebhookPushGateway(url: config.pushWebhookUrl!, client: client);
     final notifications = NotificationService(store, gateway: gateway);
+    final insights = InsightsService(store);
+    final assistant = AssistantService(store, fx, insights);
     return AppContainer._(
       config: config,
       database: database,
@@ -71,6 +79,8 @@ class AppContainer {
       hasher: hasher,
       fx: fx,
       notifications: notifications,
+      insights: insights,
+      assistant: assistant,
       httpClient: client,
       ownsHttpClient: httpClient == null,
     );

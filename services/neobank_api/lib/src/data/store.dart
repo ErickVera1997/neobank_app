@@ -387,6 +387,34 @@ class Store {
     return tx;
   }
 
+  /// Movimientos de todas las cuentas de un usuario en un rango de fechas.
+  List<BankTransaction> transactionsForUser(
+    String userId, {
+    DateTime? from,
+    DateTime? to,
+    int limit = 500,
+  }) {
+    final accountIds =
+        accountsForUser(userId).map((account) => account.id).toList();
+    if (accountIds.isEmpty) return const [];
+    final placeholders = List.filled(accountIds.length, '?').join(',');
+    final args = <Object?>[...accountIds];
+    var sql =
+        'SELECT * FROM transactions WHERE account_id IN ($placeholders)';
+    if (from != null) {
+      sql += ' AND created_at >= ?';
+      args.add(from.toUtc().toIso8601String());
+    }
+    if (to != null) {
+      sql += ' AND created_at < ?';
+      args.add(to.toUtc().toIso8601String());
+    }
+    sql += ' ORDER BY created_at DESC, id DESC LIMIT ?';
+    args.add(limit);
+    final rows = _db.select(sql, args);
+    return rows.map(_transactionFromRow).toList(growable: false);
+  }
+
   /// Página de movimientos con paginación por cursor.
   TransactionPage transactionsForAccount(
     String accountId, {

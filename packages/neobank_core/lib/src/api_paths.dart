@@ -30,6 +30,10 @@ abstract final class ApiPaths {
   static const String notifications = '/notifications';
   static String notificationRead(String id) => '/notifications/$id/read';
 
+  // Analítica y asistencia
+  static const String insights = '/insights';
+  static const String assistant = '/assistant';
+
   // Dispositivos / push
   static const String devices = '/devices';
 }
