@@ -48,7 +48,7 @@ class ConfigHandler {
         type: HomeModuleType.quickActions,
         priority: 20,
         config: {
-          'items': ['transfer', 'pay', 'topup', 'fx'],
+          'items': ['transfer', 'assistant', 'insights', 'fx'],
         },
       ),
     ];
