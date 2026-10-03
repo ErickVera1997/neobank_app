@@ -1,5 +1,5 @@
 name: neobank_mobile
-description: "A new Flutter project."
+description: "Neobank — aplicación bancaria digital (Flutter)."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -34,6 +34,17 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  neobank_core:
+    path: ../../packages/neobank_core
+  flutter_riverpod: ^3.4.3
+  go_router: ^18.0.2
+  dio: ^5.11.1
+  flutter_secure_storage: ^11.2.0
+  shared_preferences: ^2.5.5
+  connectivity_plus: ^6.1.5
+  intl: ^0.20.3
+  flutter_local_notifications: ^19.4.2
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +56,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  mocktail: ^1.0.5
+  integration_test:
+    sdk: flutter
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
