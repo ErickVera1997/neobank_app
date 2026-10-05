@@ -23,8 +23,11 @@ GoogleService-Info.plist
 # Local data
 *.sqlite
 *.sqlite3
+*.sqlite-wal
+*.sqlite-shm
 *.db
 server/data/
+services/neobank_api/data/
 
 # Coverage / test
 coverage/
