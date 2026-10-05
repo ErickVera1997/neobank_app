@@ -30,10 +30,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
     setState(() => _submitting = true);
-    await ref.read(authControllerProvider.notifier).login(
-          email: _email.text.trim(),
-          password: _password.text,
-        );
+    await ref
+        .read(authControllerProvider.notifier)
+        .login(email: _email.text.trim(), password: _password.text);
     if (mounted) setState(() => _submitting = false);
   }
 
@@ -63,20 +62,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
-              Icon(Icons.account_balance_rounded,
-                  size: 56, color: scheme.primary),
+              Icon(
+                Icons.account_balance_rounded,
+                size: 56,
+                color: scheme.primary,
+              ),
               const SizedBox(height: 16),
               Text(
                 'Bienvenida a Neobank',
                 textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
+                style: Theme.of(context).textTheme.headlineSmall
                     ?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 8),
               Text(
-                'Tu plataforma financiera digital, sin sucursales.',
+                'Tu plataforma financiera digital.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -95,8 +95,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       validator: (value) =>
                           (value == null || !value.contains('@'))
-                              ? 'Ingresa un email válido'
-                              : null,
+                          ? 'Ingresa un email válido'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -127,9 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: _submitting
-                    ? null
-                    : () => context.push('/register'),
+                onPressed: _submitting ? null : () => context.push('/register'),
                 child: const Text('Crear cuenta'),
               ),
               TextButton.icon(

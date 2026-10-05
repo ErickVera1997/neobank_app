@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+
 import 'package:neobank_core/neobank_core.dart';
 
 import '../../../shared/widgets/app_widgets.dart';
 import '../../accounts/application/accounts_controller.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../config/application/bootstrap_controller.dart';
-import '../../notifications/application/notifications_controller.dart';
 import '../../notifications/services/push_service.dart';
 import 'home_modules.dart';
 
@@ -23,7 +22,6 @@ class HomeScreen extends ConsumerWidget {
     final bootstrap = ref.watch(bootstrapProvider);
     final modules = ref.watch(homeModulesProvider);
     final user = ref.watch(authControllerProvider).value;
-    final unread = ref.watch(unreadNotificationsProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -38,10 +36,7 @@ class HomeScreen extends ConsumerWidget {
             builder: (_) => ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
               children: [
-                _HomeHeader(
-                  name: user?.firstName ?? 'Hola',
-                  unread: unread,
-                ),
+                _HomeHeader(name: user?.firstName ?? 'Hola'),
                 const SizedBox(height: 16),
                 for (final module in modules) ...[
                   _buildModule(module),
@@ -71,10 +66,9 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({required this.name, required this.unread});
+  const _HomeHeader({required this.name});
 
   final String name;
-  final int unread;
 
   @override
   Widget build(BuildContext context) {
@@ -99,9 +93,7 @@ class _HomeHeader extends StatelessWidget {
             children: [
               Text(
                 'Hola, $name',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
+                style: Theme.of(context).textTheme.titleMedium
                     ?.copyWith(fontWeight: FontWeight.w700),
               ),
               Text(
@@ -110,18 +102,6 @@ class _HomeHeader extends StatelessWidget {
               ),
             ],
           ),
-        ),
-        IconButton(
-          onPressed: () => context.go('/notifications'),
-          icon: Badge(
-            isLabelVisible: unread > 0,
-            label: Text('$unread'),
-            child: const Icon(Icons.notifications_none_rounded),
-          ),
-        ),
-        IconButton(
-          onPressed: () => context.go('/profile'),
-          icon: const Icon(Icons.person_outline_rounded),
         ),
       ],
     );
