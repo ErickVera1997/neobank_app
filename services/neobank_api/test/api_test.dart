@@ -105,6 +105,27 @@ void main() {
     expect(response.statusCode, 401);
   });
 
+  test('logout exige token y revoca el refresh token', () async {
+    final session = await harness.loginJson();
+    final token = session['tokens']['accessToken'] as String;
+    final refreshToken = session['tokens']['refreshToken'] as String;
+
+    final logout = await harness.call(
+      'POST',
+      '/auth/logout',
+      token: token,
+      body: {'refreshToken': refreshToken},
+    );
+    expect(logout.statusCode, 204);
+
+    final renewed = await harness.call(
+      'POST',
+      '/auth/refresh',
+      body: {'refreshToken': refreshToken},
+    );
+    expect(renewed.statusCode, 401);
+  });
+
   test('el usuario demo tiene cuentas y saldo consolidado', () async {
     final session = await harness.loginJson();
     final token = session['tokens']['accessToken'] as String;

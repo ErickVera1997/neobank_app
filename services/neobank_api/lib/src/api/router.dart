@@ -18,9 +18,13 @@ import 'middleware.dart';
 /// Rutas accesibles sin autenticación.
 const List<String> _publicPrefixes = ['auth/'];
 
+/// Rutas bajo `auth/` que sí exigen token (van por el router protegido).
+const List<String> _protectedAuthPaths = ['auth/logout'];
+
 bool _isPublic(String path) {
   final normalized = path.startsWith('/') ? path.substring(1) : path;
   if (normalized == 'health') return true;
+  if (_protectedAuthPaths.contains(normalized)) return false;
   return _publicPrefixes.any(normalized.startsWith);
 }
 
