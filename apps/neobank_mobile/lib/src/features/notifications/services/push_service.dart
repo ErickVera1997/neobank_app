@@ -61,6 +61,30 @@ class PushService {
     return _permissionGranted;
   }
 
+  /// Consulta el estado actual del permiso SIN volver a mostrarlo (iOS lo
+  /// reporta aunque ya esté decidido).
+  Future<bool> checkPermission() async {
+    await initialize();
+    try {
+      if (Platform.isIOS) {
+        final options = await _plugin
+            .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>()
+            ?.checkPermissions();
+        _permissionGranted = options?.isEnabled ?? _permissionGranted;
+      } else if (Platform.isAndroid) {
+        final enabled = await _plugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.areNotificationsEnabled();
+        _permissionGranted = enabled ?? _permissionGranted;
+      }
+    } catch (error) {
+      debugPrint('PushService: no se pudo consultar el permiso ($error)');
+    }
+    return _permissionGranted;
+  }
+
   Future<void> registerDevice() async {
     final token = await initialize();
     if (token == null) return;
@@ -75,6 +99,9 @@ class PushService {
   }
 
   Future<void> show(AppNotification notification) async {
+    if (!_initialized) {
+      await initialize();
+    }
     if (!_initialized) return;
     try {
       const details = NotificationDetails(
@@ -135,6 +162,12 @@ class PushService {
 
 final pushServiceProvider = Provider<PushService>(
   (ref) => PushService(ref.watch(notificationsRepositoryProvider)),
+);
+
+/// Estado actual del permiso de notificaciones del sistema (para mostrarlo en
+/// la app y permitir reactivarlo).
+final pushPermissionProvider = FutureProvider<bool>(
+  (ref) => ref.watch(pushServiceProvider).checkPermission(),
 );
 
 /// Registra el dispositivo una vez por sesión autenticada.

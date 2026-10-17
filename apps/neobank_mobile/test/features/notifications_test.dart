@@ -55,6 +55,9 @@ class _RecordingPushService implements PushService {
   Future<bool> requestPermissions() async => true;
 
   @override
+  Future<bool> checkPermission() async => true;
+
+  @override
   Future<void> registerDevice() async {}
 
   @override

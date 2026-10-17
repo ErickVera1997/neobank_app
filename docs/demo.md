@@ -129,6 +129,13 @@ rápida o botón del detalle de cuenta). En segundos deberías ver:
 > En producción, este sondeo se reemplaza por **push real (FCM/APNs)** —
 > ver `docs/operations.md`.
 
+**Si no ves la notificación del sistema:** entra a **Perfil → Notificaciones
+del sistema**. Verás el estado (Activadas/Desactivadas) y un botón **Activar**.
+Si aparece desactivado y no vuelve a preguntar el SO, reinstala la app
+(`xcrun simctl uninstall booted com.neobank.neobankMobile`) o actívalo en
+**Ajustes → Neobank Mobile → Notificaciones**. Además, siempre verás el aviso
+in-app “🔔 Tienes una notificación nueva” como respaldo.
+
 - Perfil: segmento, experimento A/B, limpiar caché, cerrar sesión.
 - El dispositivo se registra al entrar (`POST /devices`).
 

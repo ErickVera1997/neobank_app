@@ -7,6 +7,7 @@ import '../../accounts/application/accounts_controller.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../config/application/bootstrap_controller.dart';
 import '../../notifications/application/notifications_controller.dart';
+import '../../notifications/services/push_service.dart';
 
 /// Perfil del cliente y ajustes de la sesión.
 class ProfileScreen extends ConsumerWidget {
@@ -16,6 +17,8 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).value;
     final bucket = ref.watch(experimentBucketProvider);
+    final notificationsGranted =
+        ref.watch(pushPermissionProvider).value ?? false;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mi perfil')),
@@ -88,6 +91,30 @@ class ProfileScreen extends ConsumerWidget {
             Card(
               child: Column(
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.notifications_active_outlined),
+                    title: const Text('Notificaciones del sistema'),
+                    subtitle: Text(
+                      notificationsGranted
+                          ? 'Activadas'
+                          : 'Desactivadas · actívalas para recibir avisos',
+                    ),
+                    trailing: notificationsGranted
+                        ? const Icon(
+                            Icons.check_circle_rounded,
+                            color: Color(0xFF14804A),
+                          )
+                        : TextButton(
+                            onPressed: () async {
+                              await ref
+                                  .read(pushServiceProvider)
+                                  .requestPermissions();
+                              ref.invalidate(pushPermissionProvider);
+                            },
+                            child: const Text('Activar'),
+                          ),
+                  ),
+                  const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.wifi_tethering_rounded),
                     title: const Text('Simulador de red'),
