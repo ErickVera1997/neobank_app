@@ -34,6 +34,8 @@ class MainScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Consulta notificaciones nuevas en segundo plano (badge + aviso del SO).
+    ref.watch(notificationsPollerProvider);
     final unread = ref.watch(unreadNotificationsProvider);
     // En pestañas distintas a Inicio, el botón "atrás" de Android vuelve a
     // Inicio en lugar de cerrar la app.

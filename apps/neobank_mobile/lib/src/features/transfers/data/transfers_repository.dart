@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neobank_core/neobank_core.dart';
 
@@ -67,7 +69,9 @@ class TransferController extends Notifier<AsyncValue<BankTransaction?>> {
     if (success) {
       ref.invalidate(accountsSummaryProvider);
       ref.invalidate(transactionsProvider);
-      ref.invalidate(notificationsProvider);
+      // Sondear en el MISMO controlador (no invalidar) para que la nueva
+      // notificación dispare el aviso del sistema de inmediato.
+      unawaited(ref.read(notificationsProvider.notifier).poll());
     }
     return success;
   }
