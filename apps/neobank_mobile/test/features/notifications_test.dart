@@ -46,7 +46,13 @@ class _RecordingPushService implements PushService {
   final List<AppNotification> shown = [];
 
   @override
+  bool get permissionGranted => true;
+
+  @override
   Future<String?> initialize() async => 'token';
+
+  @override
+  Future<bool> requestPermissions() async => true;
 
   @override
   Future<void> registerDevice() async {}

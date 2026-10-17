@@ -37,6 +37,19 @@ class MainScaffold extends ConsumerWidget {
     // Consulta notificaciones nuevas en segundo plano (badge + aviso del SO).
     ref.watch(notificationsPollerProvider);
     final unread = ref.watch(unreadNotificationsProvider);
+
+    // Aviso in-app de respaldo: garantiza feedback aunque el sistema operativo
+    // no muestre el banner (p. ej. permiso denegado).
+    ref.listen<int>(unreadNotificationsProvider, (previous, next) {
+      if (previous != null && next > previous) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('🔔 Tienes una notificación nueva'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    });
     // En pestañas distintas a Inicio, el botón "atrás" de Android vuelve a
     // Inicio en lugar de cerrar la app.
     return PopScope(

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neobank_core/neobank_core.dart';
@@ -8,7 +9,7 @@ import 'package:uuid/uuid.dart';
 import '../../auth/application/auth_controller.dart';
 import '../data/notifications_repository.dart';
 
-/// Servicio de notificaciones.
+/// Notificaciones locales del sistema operativo.
 ///
 /// En esta demo el "push" se materializa con notificaciones locales y con el
 /// registro del dispositivo en el backend. El punto de extensión para push
@@ -22,21 +23,42 @@ class PushService {
       FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+  bool _permissionGranted = false;
+
+  /// Resultado de la solicitud de permiso (útil para diagnósticos).
+  bool get permissionGranted => _permissionGranted;
 
   Future<String?> initialize() async {
     if (_initialized) return null;
     try {
       const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-      const ios = DarwinInitializationSettings();
+      const ios = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+        // Presentación en primer plano (iOS 14+): banner + centro de
+        // notificaciones. Sin esto, iOS descarta el aviso si la app está abierta.
+        defaultPresentAlert: true,
+        defaultPresentBanner: true,
+        defaultPresentList: true,
+      );
       await _plugin.initialize(
         const InitializationSettings(android: android, iOS: ios),
       );
       await _requestPermissions();
       _initialized = true;
-    } catch (_) {
+    } catch (error) {
+      debugPrint('PushService: no se pudo inicializar ($error)');
       return null;
     }
     return 'local-${const Uuid().v4()}';
+  }
+
+  /// Fuerza la solicitud de permisos (por si se denegó y el usuario cambia de
+  /// opinión en Ajustes).
+  Future<bool> requestPermissions() async {
+    await initialize();
+    return _permissionGranted;
   }
 
   Future<void> registerDevice() async {
@@ -63,7 +85,13 @@ class PushService {
           importance: Importance.high,
           priority: Priority.high,
         ),
-        iOS: DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          presentBanner: true,
+          presentList: true,
+        ),
       );
       await _plugin.show(
         notification.id.hashCode,
@@ -71,22 +99,36 @@ class PushService {
         notification.body,
         details,
       );
-    } catch (_) {
-      // Ignorar errores de presentación.
+    } catch (error) {
+      debugPrint('PushService: no se pudo mostrar la notificación ($error)');
     }
   }
 
   Future<void> _requestPermissions() async {
-    if (Platform.isAndroid) {
-      await _plugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.requestNotificationsPermission();
-    } else if (Platform.isIOS) {
-      await _plugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(alert: true, badge: true, sound: true);
+    try {
+      if (Platform.isAndroid) {
+        final android = _plugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+        _permissionGranted =
+            await android?.requestNotificationsPermission() ?? false;
+        debugPrint(
+          'PushService: permiso de notificaciones (Android) = $_permissionGranted',
+        );
+      } else if (Platform.isIOS) {
+        final ios = _plugin.resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>();
+        _permissionGranted = await ios?.requestPermissions(
+              alert: true,
+              badge: true,
+              sound: true,
+            ) ??
+            false;
+        debugPrint(
+          'PushService: permiso de notificaciones (iOS) = $_permissionGranted',
+        );
+      }
+    } catch (error) {
+      debugPrint('PushService: error al pedir permisos ($error)');
     }
   }
 }
