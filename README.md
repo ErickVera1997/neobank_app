@@ -22,8 +22,9 @@ evolucionar hacia múltiples dominios administrados por equipos independientes.
 - **Micro-app de divisas (FX)**: tasas reales de un proveedor externo, caché y
   respuesta *stale* si el proveedor falla.
 - **Transferencias**: internas y a terceros, con notificación automática.
-- **Notificaciones**: centro in-app + registro de dispositivo y notificaciones
-  locales; gateway push desacoplado para FCM/APNs.
+- **Notificaciones push**: generadas por el backend en cada evento, con centro
+  in-app, badge en vivo y **notificación del sistema** (sondeo + notificación
+  local); gateway desacoplado para FCM/APNs en producción.
 - **Resiliencia**: caché offline, reintentos con backoff, refresh automático y
   un **simulador de red** para demostrar degradación (offline/latencia/fallos).
 - **Pruebas**: unitarias, de widgets y un flujo E2E crítico.

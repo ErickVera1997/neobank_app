@@ -104,6 +104,18 @@ telemetría. Cada transferencia debe ser trazable end-to-end por su `id`.
 | Éxito de login | > 99 % |
 | Frescura FX | < 15 min en ≥ 95 % de lecturas |
 
+### 4.6 Notificaciones (entrega)
+
+| Aspecto | Implementación actual | Producción |
+| --- | --- | --- |
+| Generación | Backend crea la notificación en eventos (p. ej. transferencias) | Igual |
+| Entrega al cliente | La app **sondea cada 20 s** y muestra una **notificación local del sistema** al detectar novedades | **Push real FCM/APNs** vía `PUSH_WEBHOOK_URL` + `firebase_messaging`; el sondeo queda como *fallback* |
+| Registro de dispositivo | `POST /devices` al iniciar sesión | Token FCM/APNs en lugar del token local |
+| Tiempo real | No (sondeo) | WebSocket/SSE o push |
+
+El sondeo se cancela al cerrar sesión y no propaga errores (refresh silencioso),
+por lo que un fallo de red no afecta la experiencia.
+
 ## 5. Runbook (diagnóstico de incidentes)
 
 | Síntoma | ¿Cómo detectarlo? | Acción |

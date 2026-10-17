@@ -197,6 +197,30 @@ sequenceDiagram
     API-->>App: reply + tarjeta estructurada + sugerencias
 ```
 
+### 5.6 Entrega de notificaciones
+
+```mermaid
+sequenceDiagram
+    participant API as API
+    participant App as App
+    participant OS as SO (bandeja)
+    API->>API: evento (transferencia) → crea notificación
+    loop Cada 20 s con sesión activa
+        App->>API: GET /notifications
+        API-->>App: lista
+        App->>App: ¿hay ids nuevos?
+        App->>OS: notificación local del sistema
+    end
+```
+
+El backend genera y persiste la notificación en el evento. Mientras hay sesión,
+la app sondea el centro de notificaciones cada 20 s; al detectar un id nuevo
+dispara una **notificación local del sistema** (`flutter_local_notifications`) y
+actualiza el badge. El sondeo se cancela al cerrar sesión y es silencioso ante
+errores. En producción se sustituye por **push real (FCM/APNs)** a través del
+`PushGateway` (`PUSH_WEBHOOK_URL`), reutilizando el registro de dispositivo
+(`POST /devices`). Detalle en `operations.md` (§4.6).
+
 ## 6. Personalización y segmentación
 
 | Mecanismo | Implementación | Sin publicar app |

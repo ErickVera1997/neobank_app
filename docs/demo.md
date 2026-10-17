@@ -112,12 +112,25 @@ Perfil → **Simulador de red**:
 
 **Criterio:** estados de carga, reintentos, caché y recuperación demostrables.
 
-## 8. Notificaciones, perfil y cierre
+## 8. Notificaciones push en vivo
 
-- Tab **Alertas**: marca como leídas (el badge del home se actualiza).
+- Tab **Alertas**: marca como leídas (el badge se actualiza al instante).
+- El backend **genera la notificación automáticamente** por cada transferencia.
+- La app **sondea novedades cada 20 s** y, al detectar una nueva, muestra una
+  **notificación del sistema operativo** (bandeja del teléfono) además de
+  actualizar el badge.
+
+**Cómo demostrarlo:** con la app abierta, haz una **transferencia** (acción
+rápida o botón del detalle de cuenta). En segundos deberías ver:
+1. el **badge** de la pestaña *Alertas* subir solo, y
+2. una **notificación del sistema** con el título “Se realizó un pago”.
+
+> La primera vez, iOS/Android pedirán permiso de notificaciones (aceptar).
+> En producción, este sondeo se reemplaza por **push real (FCM/APNs)** —
+> ver `docs/operations.md`.
+
 - Perfil: segmento, experimento A/B, limpiar caché, cerrar sesión.
-- El backend registra el dispositivo al entrar (`POST /devices`) y genera una
-  notificación por cada transferencia.
+- El dispositivo se registra al entrar (`POST /devices`).
 
 ---
 
